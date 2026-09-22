@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase/auth-context";
-import { Package, FolderTree, LogOut, Sparkles, Instagram } from "lucide-react";
+import { Package, FolderTree, LogOut, Sparkles, Instagram, Menu, X } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { isAdmin, loading, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isLoginPage = pathname === "/admin/login";
 
@@ -52,8 +53,102 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-cream-100 flex flex-col md:flex-row">
       
-      {/* Admin Sidebar */}
-      <aside className="w-full md:w-64 bg-espresso-950 text-cream-100 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-espresso-800 shrink-0">
+      {/* Mobile Top Header & Navigation Bar (Logo Left, Hamburger Right) */}
+      <header className="md:hidden sticky top-0 z-40 bg-espresso-950 text-cream-100 border-b border-espresso-800 px-5 py-3.5 shadow-lg">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 text-champagne-400">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="text-[9px] uppercase tracking-[0.25em] font-semibold">
+                Admin Portal
+              </span>
+            </div>
+            <h2 className="font-serif text-lg font-bold tracking-tight text-cream-50">
+              Fragancia D&apos;Amour
+            </h2>
+          </div>
+
+          {/* Hamburger Menu Toggle Button */}
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="p-2 text-cream-200 hover:text-white bg-espresso-900 border border-espresso-800 rounded-xl transition"
+            aria-label="Toggle Admin Menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5 text-champagne-400" />
+            ) : (
+              <Menu className="w-5 h-5 text-champagne-400" />
+            )}
+          </button>
+        </div>
+
+        {/* Dropdown Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="pt-4 pb-2 border-t border-espresso-800/80 mt-3 space-y-2 animate-fade-in">
+            <Link
+              href="/admin/products"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs uppercase tracking-widest font-medium transition-all ${
+                pathname.startsWith("/admin/products")
+                  ? "bg-champagne-500 text-espresso-950 font-semibold shadow"
+                  : "text-cream-300 hover:bg-espresso-900 hover:text-cream-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Package className="w-4 h-4" />
+                <span>Products</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/categories"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs uppercase tracking-widest font-medium transition-all ${
+                pathname.startsWith("/admin/categories")
+                  ? "bg-champagne-500 text-espresso-950 font-semibold shadow"
+                  : "text-cream-300 hover:bg-espresso-900 hover:text-cream-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <FolderTree className="w-4 h-4" />
+                <span>Categories</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/admin/instagram"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs uppercase tracking-widest font-medium transition-all ${
+                pathname.startsWith("/admin/instagram")
+                  ? "bg-champagne-500 text-espresso-950 font-semibold shadow"
+                  : "text-cream-300 hover:bg-espresso-900 hover:text-cream-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Instagram className="w-4 h-4" />
+                <span>Instagram Feed</span>
+              </div>
+            </Link>
+
+            <div className="pt-3 border-t border-espresso-800/60">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs uppercase tracking-widest font-medium text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 hover:text-rose-100 transition-colors"
+              >
+                <span>Logout</span>
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* Desktop Sidebar (Hidden on Mobile) */}
+      <aside className="hidden md:flex w-64 bg-espresso-950 text-cream-100 p-6 flex-col justify-between border-r border-espresso-800 shrink-0 h-screen sticky top-0">
         <div className="space-y-8">
           {/* Admin Header Logo */}
           <div className="space-y-1">
@@ -121,7 +216,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Admin Workspace */}
-      <main className="flex-grow p-6 sm:p-10 overflow-x-hidden">
+      <main className="flex-grow p-4 sm:p-8 md:p-10 overflow-x-hidden">
         {children}
       </main>
 
