@@ -64,19 +64,21 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 10000): Promise
 }
 
 export async function getCategories(): Promise<Category[]> {
+  const localList = getLocalCategoriesStore();
+
   if (!isFirebaseConfigured || !db) {
-    return getLocalCategoriesStore();
+    return localList;
   }
 
   try {
-    const q = query(collection(db, CATEGORIES_COLLECTION), orderBy("name", "asc"));
-    const querySnapshot = await withTimeout(getDocs(q), 2500);
+    const colRef = collection(db, CATEGORIES_COLLECTION);
+    const querySnapshot = await withTimeout(getDocs(colRef), 10000);
 
     if (!querySnapshot.empty) {
-      const categories: Category[] = [];
+      const remoteCategories: Category[] = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        categories.push({
+        remoteCategories.push({
           id: docSnap.id,
           name: data.name || "",
           slug: data.slug || "",
@@ -93,14 +95,22 @@ export async function getCategories(): Promise<Category[]> {
         });
       });
 
-      saveLocalCategoriesStore(categories);
-      return categories;
+      const remoteIds = new Set(remoteCategories.map((c) => c.id));
+      const remoteSlugs = new Set(remoteCategories.map((c) => (c.slug || "").toLowerCase()));
+
+      const missingLocal = localList.filter(
+        (lc) => !remoteIds.has(lc.id) && !remoteSlugs.has((lc.slug || "").toLowerCase())
+      );
+
+      const merged = [...remoteCategories, ...missingLocal];
+      saveLocalCategoriesStore(merged);
+      return merged;
     }
   } catch (error) {
     console.warn("Firestore error reading categories, falling back to local dataset:", error);
   }
 
-  return getLocalCategoriesStore();
+  return localList;
 }
 
 export async function getCategoryBySlug(slugOrId: string): Promise<Category | null> {

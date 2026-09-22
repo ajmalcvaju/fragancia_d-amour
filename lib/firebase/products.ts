@@ -64,20 +64,21 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 10000): Promise
 }
 
 export async function getProducts(): Promise<Product[]> {
+  const localList = getLocalProductsStore();
+
   if (!isFirebaseConfigured || !db) {
-    const list = getLocalProductsStore();
-    return [...list].sort((a, b) => a.displayOrder - b.displayOrder);
+    return [...localList].sort((a, b) => a.displayOrder - b.displayOrder);
   }
 
   try {
-    const q = query(collection(db, PRODUCTS_COLLECTION), orderBy("displayOrder", "asc"));
-    const querySnapshot = await withTimeout(getDocs(q), 2500);
+    const colRef = collection(db, PRODUCTS_COLLECTION);
+    const querySnapshot = await withTimeout(getDocs(colRef), 10000);
 
     if (!querySnapshot.empty) {
-      const products: Product[] = [];
+      const remoteProducts: Product[] = [];
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        products.push({
+        remoteProducts.push({
           id: docSnap.id,
           name: data.name || "",
           slug: data.slug || "",
@@ -104,15 +105,26 @@ export async function getProducts(): Promise<Product[]> {
         });
       });
 
-      saveLocalProductsStore(products);
-      return [...products].sort((a, b) => a.displayOrder - b.displayOrder);
+      // Merge Firestore products with initial catalog items so no product page ever 404s
+      const remoteIds = new Set(remoteProducts.map((p) => p.id));
+      const remoteSlugs = new Set(remoteProducts.map((p) => (p.slug || "").toLowerCase()));
+
+      const missingLocal = localList.filter(
+        (lp) => !remoteIds.has(lp.id) && !remoteSlugs.has((lp.slug || "").toLowerCase())
+      );
+
+      const merged = [...remoteProducts, ...missingLocal].sort(
+        (a, b) => (a.displayOrder || 1) - (b.displayOrder || 1)
+      );
+
+      saveLocalProductsStore(merged);
+      return merged;
     }
   } catch (error) {
     console.warn("Firestore error reading products, falling back to local dataset:", error);
   }
 
-  const list = getLocalProductsStore();
-  return [...list].sort((a, b) => a.displayOrder - b.displayOrder);
+  return [...localList].sort((a, b) => a.displayOrder - b.displayOrder);
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
