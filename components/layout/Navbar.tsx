@@ -34,23 +34,23 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 bg-cream-100/95 backdrop-blur-md border-b border-cream-300/60 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-22 sm:h-24">
+        <div className="flex items-center justify-between h-24 sm:h-28">
           
           {/* Official Brand Logo Container */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-cream-300 shadow-sm shrink-0 group-hover:scale-105 transition-transform bg-white">
+          <Link href="/" className="flex items-center gap-3.5 group py-2">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-cream-300/80 shadow-md shrink-0 group-hover:scale-105 transition-transform bg-white">
               <Image
                 src={SITE_CONFIG.logoUrl}
                 alt={`${SITE_CONFIG.name} Official Logo`}
                 fill
-                className="object-contain object-center p-1"
+                className="object-contain object-center p-0.5"
               />
             </div>
             <div className="flex flex-col">
               <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-espresso-900 group-hover:text-champagne-600 transition-colors uppercase">
                 Fragancia D&apos;Amour
               </span>
-              <span className="text-[9px] tracking-[0.2em] uppercase text-champagne-600 font-semibold italic -mt-1">
+              <span className="text-[9.5px] tracking-[0.2em] uppercase text-champagne-600 font-semibold italic -mt-0.5">
                 {SITE_CONFIG.slogan}
               </span>
             </div>

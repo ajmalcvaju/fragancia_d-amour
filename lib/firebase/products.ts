@@ -120,9 +120,37 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   return allProducts.filter((p) => p.featured && p.availability);
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export async function getProductBySlug(slugOrId: string): Promise<Product | null> {
   const allProducts = await getProducts();
-  return allProducts.find((p) => p.slug === slug) || null;
+  if (!slugOrId) return null;
+
+  let target = "";
+  try {
+    target = decodeURIComponent(slugOrId).toLowerCase().trim();
+  } catch (e) {
+    target = slugOrId.toLowerCase().trim();
+  }
+  const targetSlug = target.replace(/[^a-z0-9]+/g, "-");
+
+  return (
+    allProducts.find((p) => {
+      if (!p) return false;
+      const pId = (p.id || "").toLowerCase().trim();
+      const pSlug = (p.slug || "").toLowerCase().trim();
+      const pName = (p.name || "").toLowerCase().trim();
+      const pNameSlug = pName.replace(/[^a-z0-9]+/g, "-");
+
+      return (
+        pSlug === target ||
+        pSlug === targetSlug ||
+        pId === target ||
+        pNameSlug === targetSlug ||
+        pName === target ||
+        (pSlug && pSlug.length > 2 && pSlug.includes(targetSlug)) ||
+        (targetSlug && targetSlug.length > 2 && targetSlug.includes(pSlug))
+      );
+    }) || null
+  );
 }
 
 export async function getProductsByCategory(categorySlugOrId: string): Promise<Product[]> {

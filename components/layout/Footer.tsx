@@ -16,13 +16,13 @@ export const Footer: React.FC = () => {
           
           {/* Brand Info & Verified Address */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white shrink-0">
+            <div className="flex items-center gap-3.5">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-white shrink-0 border border-espresso-800 shadow-md">
                 <Image
                   src={SITE_CONFIG.logoUrl}
                   alt={`${SITE_CONFIG.name} Brand Logo`}
                   fill
-                  className="object-contain object-center p-1"
+                  className="object-contain object-center p-0.5"
                 />
               </div>
               <div>

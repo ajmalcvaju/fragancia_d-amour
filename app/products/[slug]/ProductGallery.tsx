@@ -8,9 +8,10 @@ interface ProductGalleryProps {
   productName: string;
 }
 
-export default function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const defaultImage = images.length > 0
-    ? images[0]
+export default function ProductGallery({ images = [], productName }: ProductGalleryProps) {
+  const safeImages = Array.isArray(images) && images.length > 0 ? images : [];
+  const defaultImage = safeImages.length > 0
+    ? safeImages[0]
     : "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=1000";
 
   const [selectedImage, setSelectedImage] = useState<string>(defaultImage);
